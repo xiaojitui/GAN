@@ -1,0 +1,32 @@
+The SRGAN algorithm.
+
+Basic algorithm:
+(1) first, train G for 100 epoch, by G_loss = mse loss of (real_hr vs fake_lr) # pix vs pix compare
+(2) sencond, train D and G together.
+(2a) D_loss = sigmoid loss of (real_hr_logits vs 1) + sigmoid loss of (fake_hr_logits vs 0)
+(2b) G_loss = sigmoid loss of (fake_hr_logits vs 1) + mse loss of (fake_hr vs real_hr) + mse loss of (fake_hr_vgg_feature vs real_hr_vgg_feature)
+
+
+In initial training:
+(1) by G, use lr_patch, to generate some fake hr, as fake_hr
+(2) then compare with real hr, and calculate mse loss of (fake_hr vs real_hr) # pix vs pix 
+*note: this is used to improve G
+
+
+In later training:
+(1) by G, use lr_patch, to generate some fake hr, as fake_hr
+(2) calculate D_logits
+(2a) by D, calculate logits of fake_hr as fake_hr_logits
+(2b) by D, calculate logits of real_hr as real_hr_logits
+(3) calculate D_loss
+(3a) calculate sigmoid loss of (real_hr_logits vs 1)
+(3b) calculate sigmoid loss of (fake_hr_logits vs 0)
+(3c) sum the above two as total D_loss
+*note: use sigmoid loss as: z = label, x = logits, loss = z * -log(sigmoid(x)) + (1 - z) * -log(1 - sigmoid(x))
+*note: since it is a 'binary' problem, using sigmoid-loss is same as softmax-cross-entropy-loss.
+
+(4) calculate g_loss, by g_loss =  g_gan_loss + mse_loss + vgg_loss
+(4a) g_gan_loss = 1e-3 * sigmoid loss of (fake_hr_logits vs 1) 
+(4b) mse_loss = mse loss of (fake_hr vs real_hr) # pix vs pix 
+(4c) vgg loss = 2e-6 * mse loss of (fake_hr_feature vs real_hr_feature) # feature vs feature
+*note: calculate vgg feature of fake_hr as fake_hr_feature, and vgg feature of real_hr as real_hr_feature

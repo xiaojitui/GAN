@@ -1,0 +1,23 @@
+G_net:
+
+# G_module = (kernal = 3*3, stride = 1, filter = 64, relu, padding = same )
+# up_module = (kernal = 3*3, stride = 1, filter = 256, no_act, padding = same )
+# out_module = (kernal = 1*1, stride = 1, filter = 3, tanh, padding = same )
+
+Input --> 
+1st layer G_module --> 
+# B residual blocks
+16 times of (G_module -->  batchnorm --> G_module with no act --> batchnorm --> add previous G_module) -->
+G_module with no act --> batchnorm --> add 1st layer G_module -->
+# B residual blacks end 
+up_module --> SubpixelConv2d --> up_module --> SubpixelConv2d  --> 
+out_module
+
+
+
+
+D_net:
+multiple layers of conv2d + batchnorm
+final is flatten + dense
+
+
